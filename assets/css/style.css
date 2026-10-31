@@ -1,0 +1,256 @@
+/* ==========================================================================
+   VELORA LUXURY FASHION BOUTIQUE - CORE STYLESHEET
+   Design System: Warm Couture Editorial
+   Typography: Playfair Display + Plus Jakarta Sans
+   ========================================================================== */
+
+:root {
+  --velora-primary: #541626;
+  --velora-primary-container: #702C3B;
+  --velora-on-primary: #FFFFFF;
+  --velora-primary-fixed: #FFD9DE;
+  --velora-primary-fixed-dim: #FFB2BE;
+  --velora-secondary: #745A34;
+  --velora-secondary-container: #FEDAAA;
+  --velora-on-secondary-container: #785E37;
+  --velora-secondary-fixed: #FFDDB0;
+  --velora-tertiary: #2D2D2A;
+  --velora-tertiary-container: #434340;
+  --velora-on-tertiary: #FFFFFF;
+  --velora-surface: #FEF8F4;
+  --velora-surface-dim: #DFD9D5;
+  --velora-surface-bright: #FEF8F4;
+  --velora-surface-container-lowest: #FFFFFF;
+  --velora-surface-container-low: #F9F2EF;
+  --velora-surface-container: #F3EDE9;
+  --velora-surface-container-high: #EDE7E3;
+  --velora-surface-container-highest: #E7E1DE;
+  --velora-on-surface: #1D1B19;
+  --velora-on-surface-variant: #534345;
+  --velora-outline: #867275;
+  --velora-outline-variant: #D8C1C3;
+  --velora-error: #BA1A1A;
+  --velora-error-container: #FFDAD6;
+  --velora-on-error: #FFFFFF;
+  --velora-inverse-surface: #32302E;
+  --velora-inverse-on-surface: #F6F0EC;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --radius-sharp: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--velora-surface);
+  color: var(--velora-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--velora-surface);
+  overflow-x: hidden;
+}
+
+/* Hide default scrollbars for sleek editorial touch */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--velora-surface-container-low);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--velora-outline-variant);
+  border-radius: 9999px;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+.font-label-caps {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 16px;
+}
+.font-headline-lg {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 40px;
+  letter-spacing: 0em;
+}
+.font-headline-md {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: 0.01em;
+}
+.font-headline-sm {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0.01em;
+}
+.font-price-display {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Material Symbols Adjustments */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  line-height: 1;
+}
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Luxury Button Styling */
+.velora-btn-primary {
+  background-color: var(--velora-primary);
+  color: var(--velora-on-primary);
+  border: none;
+  padding: 12px 24px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sharp);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+.velora-btn-primary:hover {
+  background-color: var(--velora-primary-container);
+  transform: translateY(-1px);
+}
+.velora-btn-primary:active {
+  transform: translateY(0);
+}
+
+.velora-btn-outline {
+  background-color: transparent;
+  color: var(--velora-on-surface);
+  border: 1px solid var(--velora-outline);
+  padding: 11px 22px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sharp);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+.velora-btn-outline:hover {
+  border-color: var(--velora-primary);
+  color: var(--velora-primary);
+  background-color: var(--velora-surface-container-low);
+}
+
+/* Hairline Product Card */
+.velora-card {
+  background: var(--velora-surface-container-lowest);
+  border: 1px solid var(--velora-surface-container-high);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.velora-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -10px rgba(84, 22, 38, 0.08);
+}
+
+/* Modals & Backdrop Blur */
+.velora-modal-backdrop {
+  background: rgba(30, 27, 25, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Toast Notification Animation */
+#velora-toast {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+
+/* Badge System */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Image Hover Zoom effect */
+.zoom-img-container {
+  overflow: hidden;
+  position: relative;
+}
+.zoom-img-container img {
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.zoom-img-container:hover img {
+  transform: scale(1.06);
+}
+
+/* Safe areas */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+}
+
+/* Container responsive widths */
+.max-w-velora {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
