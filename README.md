@@ -138,3 +138,40 @@ define('DB_PASS', '');           // Database Password (default empty on XAMPP)
    - `GET /api/cart.php` & `POST /api/cart.php?action=add|update|remove|apply_coupon`
    - `GET /api/wishlist.php` & `POST /api/wishlist.php?action=toggle`
    - `POST /api/checkout.php`
+
+---
+
+## 👑 Atelier Executive Admin Panel (`/admin/`)
+
+The full backoffice suite exported from Stitch Project `projects/1541379722541090552`:
+
+### Accessing the Admin Console:
+- **URL:** `http://localhost:8000/admin/login.php`
+- **Default Username:** `admin` or `admin@velora.com`
+- **Default Password:** `admin123`
+- **Role:** `Eleanor Vance` (Head Couturier)
+
+### Admin Features & Screens:
+1. **Executive Sign In (`admin/login.php`)**:
+   - Split-screen editorial layout with production telemetry, security watermark, and quote by Madame Hélène de Velora.
+   - Brute-force attempt countdown and session preservation.
+2. **Credential Recovery & Reset (`admin/recovery.php` & `admin/reset-password.php`)**:
+   - 3-step HSM identity restoration flow.
+   - Master passphrase update directly committed to database.
+3. **Commerce Overview & Telemetry (`admin/index.php`)**:
+   - Live revenue KPI cards, demand trajectory SVG trend charts, and salon capacity gauges.
+   - Real-time orders table with live fulfillment status badges.
+   - Critical silk yardage stock alerts & client diary feed.
+   - Monthly ledger export to CSV (`?export=csv`).
+4. **Order Lifecycle & Artisan Fulfillment (`admin/orders.php`)**:
+   - Active pipeline metrics (In Workshop, Quality Audit, VIP Valet Dispatched, Delivered).
+   - Instant search by Order #, Patron Name, Phone, or City.
+   - Status tabs and interactive fulfillment status updater dropdown.
+   - Full manifest modal with customer shipping details, courier tracking, and printable invoice bill.
+5. **Product Catalog Management (`admin/products.php`)**:
+   - View, search, and quick-edit product pricing, live stock, and badges (Featured/Bestseller).
+   - "Add New Haute Edition" modal to publish new garments.
+6. **Client Diary & Reviews (`admin/reviews.php`)**:
+   - Inspect connoisseur reviews, photos, ratings, and remove inappropriate testimonials.
+7. **Promo Codes & Vouchers (`admin/coupons.php`)**:
+   - Manage vouchers (`VELORA10`, `VELORA500`, `FESTIVE15`), discount values, and minimum spend thresholds.

@@ -22,6 +22,63 @@ if (!$product) {
     $productId = $product['id'];
 }
 
+// ─── Handle Review Submission ─────────────────────────────────────────────────
+$reviewSuccessMsg = null;
+$reviewErrorMsg = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_review') {
+    $authorName = trim($_POST['author_name'] ?? '');
+    $rating = max(1, min(5, (int)($_POST['rating'] ?? 5)));
+    $comment = trim($_POST['comment'] ?? '');
+    $customerImage = trim($_POST['customer_image'] ?? '');
+
+    if (empty($authorName) || empty($comment)) {
+        $reviewErrorMsg = 'Kindly share your name and your bespoke fitting impressions.';
+    } else {
+        // Generate patron initials
+        $parts = preg_split('/\s+/', $authorName);
+        $initials = '';
+        foreach ($parts as $p) {
+            if (!empty($p)) {
+                $initials .= strtoupper(substr($p, 0, 1));
+            }
+            if (strlen($initials) >= 2) break;
+        }
+        if (empty($initials)) $initials = 'VP';
+
+        $insertReview = $pdo->prepare("
+            INSERT INTO reviews (product_id, author_name, author_initials, author_badge, rating, comment, customer_image, created_at)
+            VALUES (?, ?, ?, 'Verified Connoisseur', ?, ?, ?, CURRENT_TIMESTAMP)
+        ");
+        $insertReview->execute([
+            $productId,
+            $authorName,
+            $initials,
+            $rating,
+            $comment,
+            !empty($customerImage) ? $customerImage : null
+        ]);
+
+        // Recalculate average rating and review count for this couture edition
+        $stmtStats = $pdo->prepare("
+            SELECT COUNT(*) as cnt, ROUND(AVG(rating), 1) as avg_rating 
+            FROM reviews 
+            WHERE product_id = ?
+        ");
+        $stmtStats->execute([$productId]);
+        $stats = $stmtStats->fetch();
+
+        if ($stats) {
+            $upProd = $pdo->prepare("UPDATE products SET review_count = ?, rating = ? WHERE id = ?");
+            $upProd->execute([$stats['cnt'], $stats['avg_rating'], $productId]);
+            $product['review_count'] = (int)$stats['cnt'];
+            $product['rating'] = (float)$stats['avg_rating'];
+        }
+
+        $reviewSuccessMsg = 'Thank you! Your testimonial has been archived in the Client Diary and shared with our atelier.';
+    }
+}
+
 // Fetch images
 $stmtImg = $pdo->prepare("SELECT * FROM product_images WHERE product_id = ? ORDER BY display_order ASC");
 $stmtImg->execute([$productId]);
@@ -61,6 +118,18 @@ $stmtRev = $pdo->prepare("SELECT * FROM reviews WHERE product_id = ? ORDER BY cr
 $stmtRev->execute([$productId]);
 $reviews = $stmtRev->fetchAll();
 
+// Dynamic Star Distribution Breakdown from Database
+$ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+foreach ($reviews as $r) {
+    $sVal = max(1, min(5, (int)$r['rating']));
+    $ratingCounts[$sVal]++;
+}
+$totalRevCount = count($reviews);
+$ratingPercents = [];
+for ($s = 1; $s <= 5; $s++) {
+    $ratingPercents[$s] = $totalRevCount > 0 ? round(($ratingCounts[$s] / $totalRevCount) * 100) : 0;
+}
+
 // Fetch accessories
 $stmtAcc = $pdo->prepare("SELECT * FROM bundled_accessories WHERE parent_product_id = ?");
 $stmtAcc->execute([$productId]);
@@ -97,7 +166,7 @@ require_once __DIR__ . '/includes/header.php';
       <section class="flex flex-col gap-3">
         <!-- Main Hero Presentation -->
         <div class="relative w-full aspect-[4/5] bg-surface-container overflow-hidden rounded-xl shadow-md group">
-          <img id="main-product-img" src="<?= htmlspecialchars($images[0]['image_url']) ?>" alt="<?= htmlspecialchars($product['title']) ?>" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"/>
+          <img id="main-product-img" src="<?= htmlspecialchars(veloraImageUrl($images[0]['image_url'])) ?>" alt="<?= htmlspecialchars($product['title']) ?>" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"/>
 
           <!-- Limited Edition Silk Crest -->
           <div class="absolute top-4 left-4 bg-primary text-on-primary px-3 py-1 rounded shadow-sm font-label-caps text-[10px] tracking-widest uppercase">
@@ -113,8 +182,8 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Thumbnail Strip -->
         <div class="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
           <?php foreach ($images as $idx => $img): ?>
-            <button class="thumb-btn relative flex-shrink-0 w-16 h-20 rounded overflow-hidden bg-surface-container border-2 transition-all <?= $idx === 0 ? 'border-primary opacity-100 shadow-md' : 'border-transparent opacity-70 hover:opacity-100' ?>" onclick="switchHero(<?= $idx ?>, '<?= htmlspecialchars($img['image_url']) ?>')">
-              <img class="w-full h-full object-cover" src="<?= htmlspecialchars($img['image_url']) ?>" alt="<?= htmlspecialchars($img['alt_text'] ?? $product['title']) ?>"/>
+            <button class="thumb-btn relative flex-shrink-0 w-16 h-20 rounded overflow-hidden bg-surface-container border-2 transition-all <?= $idx === 0 ? 'border-primary opacity-100 shadow-md' : 'border-transparent opacity-70 hover:opacity-100' ?>" onclick="switchHero(<?= $idx ?>, '<?= htmlspecialchars(veloraImageUrl($img['image_url'])) ?>')">
+              <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($img['image_url'])) ?>" alt="<?= htmlspecialchars($img['alt_text'] ?? $product['title']) ?>"/>
               <?php if (!empty($img['is_video_preview'])): ?>
                 <span class="material-symbols-outlined absolute inset-0 m-auto text-white text-[22px] drop-shadow-md flex items-center justify-center bg-black/30">
                   play_circle
@@ -176,23 +245,6 @@ require_once __DIR__ . '/includes/header.php';
 
         <hr class="border-surface-container-high"/>
 
-        <!-- Colorways Selector -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-label-caps text-on-surface font-semibold text-xs">
-              Color: <span class="text-primary font-bold" id="color-label"><?= htmlspecialchars($colors[0]['color_name'] ?? 'Royal Wine Burgundy') ?></span>
-            </span>
-            <span class="font-label-caps text-[10px] text-outline">Artisanal Natural Dyes</span>
-          </div>
-          <div class="flex items-center gap-3 pt-1">
-            <?php foreach ($colors as $cIdx => $col): ?>
-              <button onclick="selectColorway('<?= htmlspecialchars($col['color_name']) ?>', this)" class="color-dot relative w-9 h-9 rounded-full shadow-md transition-transform border border-white <?= $cIdx === 0 ? 'scale-110 ring-2 ring-primary ring-offset-2' : 'hover:scale-105' ?>" style="background-color: <?= htmlspecialchars($col['hex_code']) ?>;" title="<?= htmlspecialchars($col['color_name']) ?>">
-                <span class="material-symbols-outlined <?= $cIdx === 0 ? '' : 'hidden' ?> inset-0 m-auto text-white text-[16px] flex items-center justify-center">check</span>
-              </button>
-            <?php endforeach; ?>
-          </div>
-        </div>
-
         <!-- Size Selection Module -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
@@ -211,10 +263,7 @@ require_once __DIR__ . '/includes/header.php';
               </button>
             <?php endforeach; ?>
           </div>
-          <div class="flex items-center gap-2 p-2.5 rounded bg-error-container/40 text-on-error-container border border-error/20">
-            <span class="material-symbols-outlined text-[16px] text-error">timer</span>
-            <p class="font-sans text-xs font-semibold">Low Stock Alert: Only 2 handcrafted pieces left in Size S!</p>
-          </div>
+
         </div>
 
         <!-- Quantity & Primary Action Strip -->
@@ -327,7 +376,7 @@ require_once __DIR__ . '/includes/header.php';
           <?php foreach ($accessories as $acc): ?>
             <div class="bg-surface rounded-xl p-3 shadow-sm border border-outline-variant/40 flex flex-col justify-between">
               <div class="w-full aspect-square rounded-lg bg-surface-container overflow-hidden mb-2 relative">
-                <img class="w-full h-full object-cover" src="<?= htmlspecialchars($acc['image_url']) ?>" alt="<?= htmlspecialchars($acc['name']) ?>"/>
+                <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($acc['image_url'])) ?>" alt="<?= htmlspecialchars($acc['name']) ?>"/>
                 <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-tertiary text-on-tertiary font-label-caps text-[8px]">
                   <?= htmlspecialchars($acc['tag']) ?>
                 </span>
@@ -346,60 +395,93 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <!-- Customer Reviews Section -->
-    <section class="py-8 border-t border-surface-container-high/60 flex flex-col gap-6">
+    <section id="reviewsSection" class="py-8 border-t border-surface-container-high/60 flex flex-col gap-6">
+
+      <?php if ($reviewSuccessMsg): ?>
+      <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-3">
+        <span class="material-symbols-outlined text-emerald-600 text-[20px]">verified</span>
+        <span class="font-medium"><?= htmlspecialchars($reviewSuccessMsg) ?></span>
+      </div>
+      <?php endif; ?>
+
+      <?php if ($reviewErrorMsg): ?>
+      <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-3">
+        <span class="material-symbols-outlined text-rose-600 text-[20px]">error</span>
+        <span class="font-medium"><?= htmlspecialchars($reviewErrorMsg) ?></span>
+      </div>
+      <?php endif; ?>
+
       <div class="flex items-center justify-between">
         <div>
           <span class="font-label-caps text-secondary uppercase tracking-widest font-bold">Client Diary</span>
           <h3 class="font-serif text-2xl text-on-surface">Customer Reviews</h3>
         </div>
-        <button onclick="triggerAddedToast('Review submission opened')" class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-caps text-[11px] font-semibold hover:bg-surface-container-highest transition-colors">
-          Write Review
+        <button type="button" onclick="openReviewModal()" class="px-5 py-2.5 rounded-full bg-primary hover:bg-[#3d0415] text-on-primary font-label-caps text-xs font-semibold transition-all shadow-md flex items-center gap-2 cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">rate_review</span>
+          <span>Write Review</span>
         </button>
       </div>
 
-      <!-- Rating Summary Dashboard -->
+      <!-- Rating Summary Dashboard (Click any star or bar to filter reviews) -->
       <div class="p-5 rounded-xl bg-surface-container-low border border-surface-container-high/60 flex flex-col sm:flex-row items-center gap-6">
-        <div class="text-center sm:min-w-[100px]">
-          <span class="font-serif text-4xl text-primary font-bold block"><?= $product['rating'] ?></span>
-          <div class="flex text-[#D4AF37] justify-center my-1">
-            <span class="material-symbols-outlined text-[14px] fill-1">star</span>
-            <span class="material-symbols-outlined text-[14px] fill-1">star</span>
-            <span class="material-symbols-outlined text-[14px] fill-1">star</span>
-            <span class="material-symbols-outlined text-[14px] fill-1">star</span>
-            <span class="material-symbols-outlined text-[14px] fill-1">star</span>
+        <div class="text-center sm:min-w-[120px]">
+          <span class="font-serif text-4xl text-primary font-bold block"><?= number_format((float)$product['rating'], 1) ?></span>
+          <div class="flex text-[#D4AF37] justify-center my-1 gap-0.5">
+            <?php for ($starI = 1; $starI <= 5; $starI++): ?>
+            <button type="button" onclick="filterReviewsByStar(<?= $starI ?>)" title="Click to filter by <?= $starI ?> stars" class="hover:scale-125 transition-transform cursor-pointer p-0.5">
+              <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' <?= $starI <= round((float)$product['rating']) ? 1 : 0 ?>;">star</span>
+            </button>
+            <?php endfor; ?>
           </div>
-          <span class="font-label-caps text-[10px] text-outline"><?= $product['review_count'] ?> Ratings</span>
+          <span class="font-label-caps text-[10px] text-outline block"><?= count($reviews) ?> Ratings</span>
+          <button type="button" onclick="filterReviewsByStar(0)" id="resetStarFilterBtn" class="hidden mt-1.5 text-[10px] text-primary font-bold hover:underline cursor-pointer">
+            Clear Filter (Show All)
+          </button>
         </div>
 
-        <div class="flex-1 w-full space-y-1.5 font-label-caps text-[10px] text-on-surface-variant">
-          <div class="flex items-center gap-2">
-            <span>5★</span>
-            <div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-              <div class="bg-primary h-full w-[88%] rounded-full"></div>
+        <!-- Dynamic Star Distribution Bars with Click-To-Filter -->
+        <div class="flex-1 w-full space-y-1.5 font-label-caps text-[11px] text-on-surface-variant">
+          <?php for ($s = 5; $s >= 1; $s--): 
+            $pct = $ratingPercents[$s] ?? 0;
+            $cnt = $ratingCounts[$s] ?? 0;
+          ?>
+          <button type="button" onclick="filterReviewsByStar(<?= $s ?>)" id="starRow_<?= $s ?>" title="Click to filter only <?= $s ?>-star reviews" class="star-filter-row w-full flex items-center gap-3 px-2.5 py-1 rounded-lg hover:bg-surface-container-high/70 transition-all cursor-pointer group text-left">
+            <span class="w-6 font-bold group-hover:text-primary transition-colors"><?= $s ?>★</span>
+            <div class="flex-1 h-2.5 bg-surface-container-highest rounded-full overflow-hidden">
+              <div class="bg-primary h-full rounded-full transition-all duration-300" style="width: <?= $pct ?>%"></div>
             </div>
-            <span>88%</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span>4★</span>
-            <div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-              <div class="bg-primary h-full w-[9%] rounded-full"></div>
-            </div>
-            <span>9%</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span>3★</span>
-            <div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-              <div class="bg-primary h-full w-[2%] rounded-full"></div>
-            </div>
-            <span>2%</span>
-          </div>
+            <span class="w-14 text-right font-mono text-[10px] text-outline group-hover:text-primary font-semibold"><?= $pct ?>% (<?= $cnt ?>)</span>
+          </button>
+          <?php endfor; ?>
         </div>
       </div>
 
-      <!-- Verified Review Cards -->
-      <div class="space-y-4">
+      <!-- Active Star Filter Notification Pill -->
+      <div id="activeFilterBanner" class="hidden items-center justify-between p-3.5 rounded-xl bg-secondary-container/40 border border-secondary/30 text-xs text-on-secondary-container">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-secondary">filter_alt</span>
+          <span>Showing only <strong id="selectedStarLabel" class="text-primary font-bold">3-Star</strong> reviews (<span id="filteredMatchCount">0</span> reviews found)</span>
+        </div>
+        <button type="button" onclick="filterReviewsByStar(0)" class="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+          <span>Show All Reviews</span>
+          <span class="material-symbols-outlined text-[14px]">close</span>
+        </button>
+      </div>
+
+      <!-- No Matching Reviews Notice -->
+      <div id="noReviewsNotice" class="hidden p-8 rounded-xl bg-surface-container-low text-center border border-surface-container-high/60 space-y-2">
+        <span class="material-symbols-outlined text-secondary text-[32px]">star_half</span>
+        <p class="font-serif text-base text-on-surface font-semibold">No reviews found for this star tier yet.</p>
+        <p class="text-xs text-on-surface-variant">Be the first patron to submit your fitting impressions for this rating.</p>
+        <button type="button" onclick="filterReviewsByStar(0)" class="mt-2 px-4 py-2 bg-primary hover:bg-[#3d0415] text-on-primary rounded-full text-xs font-semibold transition-colors cursor-pointer">
+          Show All Reviews
+        </button>
+      </div>
+
+      <!-- Verified Review Cards (Tagged with data-rating for instant filtering) -->
+      <div class="space-y-4" id="reviewsCardsContainer">
         <?php foreach ($reviews as $rev): ?>
-          <div class="p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm space-y-2.5">
+          <div class="review-card p-5 rounded-xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm space-y-2.5 transition-all" data-rating="<?= (int)$rev['rating'] ?>">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-caps text-xs font-bold">
@@ -413,7 +495,15 @@ require_once __DIR__ . '/includes/header.php';
                   </div>
                 </div>
               </div>
-              <span class="font-label-caps text-[10px] text-outline">Verified Purchase</span>
+              <div class="flex items-center gap-3">
+                <!-- Star Rating Display on Each Card -->
+                <div class="flex text-[#D4AF37]">
+                  <?php for ($sc = 1; $sc <= 5; $sc++): ?>
+                  <span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' <?= $sc <= (int)$rev['rating'] ? 1 : 0 ?>;">star</span>
+                  <?php endfor; ?>
+                </div>
+                <span class="font-label-caps text-[10px] text-outline">Verified Purchase</span>
+              </div>
             </div>
             
             <p class="font-sans text-xs text-on-surface leading-relaxed">
@@ -422,7 +512,7 @@ require_once __DIR__ . '/includes/header.php';
 
             <?php if (!empty($rev['customer_image'])): ?>
               <div class="w-16 h-16 rounded overflow-hidden mt-2 border border-outline-variant/40">
-                <img class="w-full h-full object-cover" src="<?= htmlspecialchars($rev['customer_image']) ?>" alt="Review photo"/>
+                <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($rev['customer_image'])) ?>" alt="Review photo"/>
               </div>
             <?php endif; ?>
           </div>
@@ -464,10 +554,194 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </div>
 
+<!-- Write Review Modal -->
+<div id="reviewModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-surface w-full max-w-lg rounded-2xl shadow-2xl border border-surface-container-high overflow-hidden flex flex-col max-h-[92vh]">
+    <div class="p-5 bg-surface-container-low border-b border-surface-container-high flex items-center justify-between">
+      <div>
+        <span class="font-label-caps text-[10px] uppercase font-bold tracking-widest text-secondary block">Atelier Client Diary</span>
+        <h3 class="font-serif text-xl text-primary font-medium">Write Connoisseur Review</h3>
+      </div>
+      <button type="button" onclick="closeReviewModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant cursor-pointer">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form action="product.php?id=<?= $productId ?>#reviewsSection" method="POST" class="p-6 overflow-y-auto space-y-4 text-xs">
+      <input type="hidden" name="action" value="submit_review"/>
+
+      <div>
+        <label class="text-[10px] uppercase font-bold text-on-surface-variant block mb-1">Couture Edition</label>
+        <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high/60 flex items-center gap-3">
+          <img src="<?= htmlspecialchars(veloraImageUrl($product['primary_image'])) ?>" alt="<?= htmlspecialchars($product['title']) ?>" class="w-10 h-12 object-cover rounded bg-surface-container"/>
+          <div>
+            <span class="font-medium text-xs text-on-surface block"><?= htmlspecialchars($product['title']) ?></span>
+            <span class="text-[10px] text-secondary font-semibold uppercase">₹<?= number_format((float)$product['price']) ?></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] uppercase font-bold text-on-surface-variant block mb-1.5">Rating *</label>
+        <div class="flex items-center gap-1.5" id="starRatingContainer">
+          <input type="hidden" name="rating" id="reviewRatingInput" value="5"/>
+          <?php for ($s = 1; $s <= 5; $s++): ?>
+          <button type="button" onclick="setReviewRating(<?= $s ?>)" class="text-[#D4AF37] hover:scale-110 transition-transform cursor-pointer p-0.5">
+            <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;" id="starIcon_<?= $s ?>">star</span>
+          </button>
+          <?php endfor; ?>
+          <span class="text-xs font-semibold text-secondary ml-2" id="ratingScoreLabel">5.0 — Exceptional Couture</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] uppercase font-bold text-on-surface-variant block mb-1">Your Name / Patron Title *</label>
+        <input name="author_name" required placeholder="e.g. Devika Sharma / Tara Mehta" class="w-full bg-surface-container-low text-on-surface p-3 rounded-xl border border-outline-variant/60 outline-none focus:border-primary text-xs"/>
+      </div>
+
+      <div>
+        <label class="text-[10px] uppercase font-bold text-on-surface-variant block mb-1">Your Fitting &amp; Silk Experience *</label>
+        <textarea name="comment" rows="4" required placeholder="Describe the silk drape, tailoring finish, fit precision, and salon service..." class="w-full bg-surface-container-low text-on-surface p-3 rounded-xl border border-outline-variant/60 outline-none focus:border-primary text-xs resize-none"></textarea>
+      </div>
+
+      <div>
+        <label class="text-[10px] uppercase font-bold text-on-surface-variant block mb-1">Patron Photo URL (Optional)</label>
+        <input name="customer_image" type="text" placeholder="assets/img/customer-photo.jpg" class="w-full bg-surface-container-low text-on-surface p-3 rounded-xl border border-outline-variant/60 outline-none focus:border-primary text-xs"/>
+      </div>
+
+      <div class="pt-4 flex items-center justify-end gap-3 border-t border-surface-container-high/60">
+        <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl bg-surface border border-outline-variant/60 text-xs font-semibold uppercase tracking-wider text-on-surface cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-[#3d0415] text-on-primary text-xs font-semibold uppercase tracking-wider shadow-md cursor-pointer transition-colors">
+          Publish to Client Diary
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   let selectedColor = '<?= htmlspecialchars($colors[0]['color_name'] ?? 'Royal Wine Burgundy') ?>';
   let selectedSize = 'S';
   let currentQty = 1;
+
+  function openReviewModal() {
+    const m = document.getElementById('reviewModal');
+    if (m) {
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+  }
+
+  function closeReviewModal() {
+    const m = document.getElementById('reviewModal');
+    if (m) {
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    }
+  }
+
+  const ratingDescriptions = {
+    1: '1.0 — Below Expectations',
+    2: '2.0 — Needs Alterations',
+    3: '3.0 — Satisfactory Silk',
+    4: '4.0 — High Craftsmanship',
+    5: '5.0 — Exceptional Couture'
+  };
+
+  function setReviewRating(stars) {
+    document.getElementById('reviewRatingInput').value = stars;
+    document.getElementById('ratingScoreLabel').textContent = ratingDescriptions[stars] || (stars + '.0');
+    for (let i = 1; i <= 5; i++) {
+      const star = document.getElementById('starIcon_' + i);
+      if (star) {
+        if (i <= stars) {
+          star.style.fontVariationSettings = "'FILL' 1";
+          star.classList.add('text-[#D4AF37]');
+          star.classList.remove('text-outline-variant');
+        } else {
+          star.style.fontVariationSettings = "'FILL' 0";
+          star.classList.remove('text-[#D4AF37]');
+          star.classList.add('text-outline-variant');
+        }
+      }
+    }
+  }
+
+  let activeStarFilter = 0;
+
+  function filterReviewsByStar(star) {
+    if (activeStarFilter === star && star !== 0) {
+      // Toggle off to show all reviews if clicked again
+      star = 0;
+    }
+    activeStarFilter = star;
+
+    const cards = document.querySelectorAll('.review-card');
+    const filterBanner = document.getElementById('activeFilterBanner');
+    const noReviewsNotice = document.getElementById('noReviewsNotice');
+    const resetBtn = document.getElementById('resetStarFilterBtn');
+    const label = document.getElementById('selectedStarLabel');
+    const matchCountSpan = document.getElementById('filteredMatchCount');
+
+    // Remove active styles from star rows
+    document.querySelectorAll('.star-filter-row').forEach(row => {
+      row.classList.remove('bg-surface-container-high', 'ring-1', 'ring-primary');
+    });
+
+    if (star === 0) {
+      // Show all reviews
+      cards.forEach(card => card.style.display = '');
+      if (filterBanner) {
+        filterBanner.classList.add('hidden');
+        filterBanner.classList.remove('flex');
+      }
+      if (noReviewsNotice) noReviewsNotice.classList.add('hidden');
+      if (resetBtn) resetBtn.classList.add('hidden');
+      triggerAddedToast('Showing all connoisseur reviews');
+      return;
+    }
+
+    // Highlight selected filter row
+    const selectedRow = document.getElementById('starRow_' + star);
+    if (selectedRow) {
+      selectedRow.classList.add('bg-surface-container-high', 'ring-1', 'ring-primary');
+    }
+
+    let matchCount = 0;
+    cards.forEach(card => {
+      const cardRating = parseInt(card.getAttribute('data-rating') || '0', 10);
+      if (cardRating === star) {
+        card.style.display = '';
+        matchCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    if (filterBanner) {
+      filterBanner.classList.remove('hidden');
+      filterBanner.classList.add('flex');
+    }
+    if (label) label.textContent = star + '-Star';
+    if (matchCountSpan) matchCountSpan.textContent = matchCount;
+    if (resetBtn) resetBtn.classList.remove('hidden');
+
+    if (matchCount === 0) {
+      if (noReviewsNotice) noReviewsNotice.classList.remove('hidden');
+    } else {
+      if (noReviewsNotice) noReviewsNotice.classList.add('hidden');
+    }
+
+    // Smooth scroll down to reviews if filter is triggered
+    const reviewsEl = document.getElementById('reviewsCardsContainer');
+    if (reviewsEl) {
+      reviewsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    triggerAddedToast(`Filtered to ${star}-star reviews (${matchCount} found)`);
+  }
 
   function switchHero(idx, imgUrl) {
     const mainImg = document.getElementById('main-product-img');

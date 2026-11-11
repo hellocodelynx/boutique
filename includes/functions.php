@@ -10,9 +10,46 @@ if (!defined('VELORA_ACCESS')) {
 
 require_once __DIR__ . '/../config/db.php';
 
+function veloraImageUrl($imagePath) {
+    $imagePath = str_replace('\\', '/', trim((string)$imagePath));
+    if ($imagePath === '' || !preg_match('~^assets/img/~', $imagePath)) {
+        return $imagePath;
+    }
+
+    $projectRoot = realpath(__DIR__ . '/..');
+    $documentRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+    $documentRootPath = $documentRoot !== false ? rtrim($documentRoot, '\\/') : '';
+    if ($projectRoot !== false && $documentRootPath !== ''
+        && stripos($projectRoot, $documentRootPath) === 0
+        && ($projectRoot === $documentRootPath
+            || substr($projectRoot, strlen($documentRootPath), 1) === DIRECTORY_SEPARATOR)) {
+        $relativeRoot = substr($projectRoot, strlen($documentRootPath));
+        $relativeRoot = trim(str_replace('\\', '/', $relativeRoot), '/');
+        return '/' . ($relativeRoot !== '' ? $relativeRoot . '/' : '') . $imagePath;
+    }
+
+    return $imagePath;
+}
+
 function startVeloraSession() {
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+        $savePath = session_save_path();
+        $canWrite = false;
+        if (!empty($savePath) && is_dir($savePath)) {
+            $testFile = rtrim($savePath, '\\/') . '/.velora_sess_test_' . uniqid();
+            $canWrite = @file_put_contents($testFile, '1') !== false;
+            if ($canWrite) {
+                @unlink($testFile);
+            }
+        }
+        if (!$canWrite) {
+            $localSessions = __DIR__ . '/../database/sessions';
+            if (!is_dir($localSessions)) {
+                @mkdir($localSessions, 0777, true);
+            }
+            session_save_path($localSessions);
+        }
+        @session_start();
     }
     if (empty($_SESSION['velora_session_id'])) {
         // Use demo_session as starting seed so users immediately see 2 items in cart and 3 in wishlist like the Stitch prototype

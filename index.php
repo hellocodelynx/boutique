@@ -26,7 +26,7 @@ require_once __DIR__ . '/includes/header.php';
   <div class="max-w-velora w-full mx-auto px-4 sm:px-8 flex flex-col gap-8">
     
     <!-- Subtle Editorial Ambient Banner -->
-    <div class="pt-3">
+    <div class="pt-14">
       <div class="bg-secondary-container/40 py-2 px-5 rounded-full flex items-center justify-between text-on-secondary-container border border-secondary/20">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[16px] text-secondary">workspace_premium</span>
@@ -37,35 +37,44 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Editorial Hero Section: Asymmetric & Haute Couture -->
-    <section class="relative">
-      <div class="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] rounded-xl overflow-hidden shadow-xl bg-surface-container">
-        <div class="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPOYP4B2690p0XTcHYbinlyYqGKmkQqYV0pooWkmIPC2pOoxDkTI9wm8LmaHHm7ALoiTAGbpYmJkukv5HIOD0lwrL4Lp_foufW1qij4rgS40qwlcyQOiZgFUc48yPw41engK4X7D7vV0o76HUckWeDw3xEVjp41vHk2lfj-MQI9i05lidvgv8BHCBz57rPoxCi2yBSdXb6SY2Xvqp_1xWOyOjaHDi_kw3TtFeW00IjOr7toBcqtnZO');">
-          <!-- Vignette Gradient Scrim -->
-          <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/30 to-transparent"></div>
+    <section class="relative group">
+      <div class="relative w-full aspect-[4/5] sm:aspect-[16/10] md:aspect-[16/9] min-h-[460px] sm:min-h-[520px] md:min-h-[560px] rounded-2xl overflow-hidden shadow-2xl bg-surface-container">
+        
+        <!-- High-Resolution Crystal-Clear Hero Image -->
+        <img 
+          src="<?= htmlspecialchars(veloraImageUrl('assets/img/hero-couture.jpg')) ?>"
+          alt="Chic Indian high-fashion muse in wine burgundy raw silk gown" 
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+          class="absolute inset-0 w-full h-full object-cover object-[center_top] md:object-[center_12%] transition-transform duration-700 group-hover:scale-105"
+        />
+
+        <!-- Vignette Gradient Scrim (Bottom & Left for Text Readability without Muddying the Muse) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/30 to-transparent md:bg-gradient-to-r md:from-primary/90 md:via-primary/35 md:to-transparent"></div>
+        
+        <div class="absolute inset-0 p-6 sm:p-12 flex flex-col justify-end text-on-primary z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/20 backdrop-blur-md w-fit mb-3 border border-white/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+            <span class="font-label-caps text-[10px] uppercase tracking-widest text-secondary-fixed">Atelier Autumn/Winter ’26</span>
+          </div>
           
-          <div class="absolute inset-0 p-6 sm:p-12 flex flex-col justify-end text-on-primary">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface/20 backdrop-blur-md w-fit mb-3 border border-white/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
-              <span class="font-label-caps text-[10px] uppercase tracking-widest text-secondary-fixed">Atelier Autumn/Winter ’25</span>
-            </div>
-            
-            <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl italic leading-tight text-on-primary max-w-xl">
-              Find Your Kind of Beautiful
-            </h1>
-            
-            <p class="font-sans text-xs sm:text-base text-surface-container-low mt-2 line-clamp-2 max-w-md opacity-90 leading-relaxed">
-              Handcrafted silhouettes celebrating modern heritage & timeless, poetic drapes.
-            </p>
-            
-            <div class="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <a href="shop.php" class="h-12 px-8 bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-[0.99] font-label-caps tracking-widest uppercase font-semibold">
-                <span>Shop The Festive Atelier</span>
-                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </a>
-              <a href="shop.php?collection=lookbook" class="h-10 px-4 flex items-center justify-center gap-1.5 text-on-primary/90 hover:text-on-primary font-label-caps text-[11px] uppercase tracking-widest underline underline-offset-4">
-                <span>Explore Lookbook 2025</span>
-              </a>
-            </div>
+          <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl italic leading-tight text-on-primary max-w-xl">
+            Find Your Kind of Beautiful
+          </h1>
+          
+          <p class="font-sans text-xs sm:text-base text-surface-container-low mt-2 line-clamp-2 max-w-md opacity-90 leading-relaxed">
+            Handcrafted silhouettes celebrating modern heritage & timeless, poetic drapes.
+          </p>
+          
+          <div class="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="shop.php" class="h-12 px-8 bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-[0.99] font-label-caps tracking-widest uppercase font-semibold rounded">
+              <span>Shop The Festive Atelier</span>
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+            <a href="shop.php?collection=lookbook" class="h-10 px-4 flex items-center justify-center gap-1.5 text-on-primary/90 hover:text-on-primary font-label-caps text-[11px] uppercase tracking-widest underline underline-offset-4">
+              <span>Explore Lookbook 2026</span>
+            </a>
           </div>
         </div>
       </div>
@@ -82,7 +91,7 @@ require_once __DIR__ . '/includes/header.php';
           <a href="shop.php?category=<?= urlencode($cat['slug']) ?>" class="flex flex-col items-center gap-2 shrink-0 group">
             <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 bg-secondary-container shadow-sm group-hover:scale-105 transition-transform border border-secondary/30">
               <div class="w-full h-full rounded-full overflow-hidden bg-surface-container">
-                <img class="w-full h-full object-cover" src="<?= htmlspecialchars($cat['image_url']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"/>
+                <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($cat['image_url'])) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"/>
               </div>
             </div>
             <span class="font-label-caps text-[10px] sm:text-[11px] uppercase tracking-wider text-on-surface text-center group-hover:text-primary transition-colors">
@@ -111,7 +120,7 @@ require_once __DIR__ . '/includes/header.php';
           <div class="velora-card rounded-xl overflow-hidden shadow-sm flex flex-col group relative">
             <div class="relative w-full aspect-[3/4] bg-surface-container overflow-hidden">
               <a href="product.php?id=<?= $p['id'] ?>">
-                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= htmlspecialchars($p['primary_image']) ?>" alt="<?= htmlspecialchars($p['title']) ?>"/>
+                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= htmlspecialchars(veloraImageUrl($p['primary_image'])) ?>" alt="<?= htmlspecialchars($p['title']) ?>"/>
               </a>
               <?php if (!empty($p['badge'])): ?>
                 <span class="absolute top-2.5 left-2.5 bg-primary text-on-primary font-label-caps text-[9px] uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm">
@@ -149,7 +158,7 @@ require_once __DIR__ . '/includes/header.php';
       <div class="relative rounded-xl overflow-hidden bg-primary text-on-primary shadow-xl">
         <div class="flex flex-col md:flex-row">
           <div class="relative w-full md:w-1/2 aspect-square md:aspect-auto overflow-hidden">
-            <img alt="VELORA Couture Muse" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJk3k8ZhR53atfvbAeQcDTIUB-YAOk8VlEo1RQUlWenzw_Kf7H8TG3O7FSsvodtx9qeRrK7edw46Ggse6RHzzWzDGDeS_WilmJXZ22pGprhocrjxgQJzvutcQxGRH0zbRmugTZXJ7dXD2m1MuSAP0mFCtd_34W-Y9qxzS935wDmhPEw3XbWhGDhhjaPRF7vs8X98idhbzWohEqqDebMkBKsNFL4YWd_zaG-Ixl8MouCTSC7GbFhSvr"/>
+            <img alt="VELORA Couture Muse" class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl('assets/img/atelier-muse.jpg')) ?>"/>
             <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-primary via-transparent to-transparent"></div>
           </div>
           
@@ -192,7 +201,7 @@ require_once __DIR__ . '/includes/header.php';
           <div class="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex gap-4 border border-surface-container-high/60">
             <div class="relative w-28 sm:w-36 aspect-[3/4] rounded-lg overflow-hidden shrink-0 bg-surface-container">
               <a href="product.php?id=<?= $tp['id'] ?>">
-                <img class="w-full h-full object-cover" src="<?= htmlspecialchars($tp['primary_image']) ?>" alt="<?= htmlspecialchars($tp['title']) ?>"/>
+                <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($tp['primary_image'])) ?>" alt="<?= htmlspecialchars($tp['title']) ?>"/>
               </a>
               <?php if (!empty($tp['badge'])): ?>
                 <span class="absolute top-1.5 left-1.5 bg-primary text-on-primary font-label-caps text-[8px] uppercase px-1.5 py-0.5 rounded-full">
@@ -222,11 +231,11 @@ require_once __DIR__ . '/includes/header.php';
               </div>
 
               <div class="flex items-center justify-between pt-2 border-t border-surface-container-high/40">
-                <div class="flex items-center gap-1.5">
+                <!-- <div class="flex items-center gap-1.5">
                   <span class="w-4 h-4 rounded-full bg-[#541626] ring-1 ring-primary ring-offset-1" title="Wine"></span>
                   <span class="w-4 h-4 rounded-full bg-[#FAF7F2] ring-1 ring-outline" title="Ivory"></span>
                   <span class="w-4 h-4 rounded-full bg-[#7D8B7A]" title="Sage"></span>
-                </div>
+                </div> -->
                 
                 <button onclick="quickAddToCart(<?= $tp['id'] ?>)" aria-label="Add to bag" class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-primary hover:text-on-primary transition-colors font-label-caps text-[10px] tracking-wider uppercase flex items-center gap-1">
                   <span class="material-symbols-outlined text-[16px]">add</span> Add

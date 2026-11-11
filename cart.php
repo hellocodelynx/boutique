@@ -15,6 +15,12 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$sessionId]);
 $cartItems = $stmt->fetchAll();
+$availableCoupons = $pdo->query("
+    SELECT code, discount_type, discount_value, min_spend, description
+    FROM coupons
+    WHERE is_active = 1
+    ORDER BY id DESC
+")->fetchAll();
 
 $subtotal = 0;
 foreach ($cartItems as $item) {
@@ -44,7 +50,7 @@ $pageTitle = 'Your Shopping Bag | VELORA Atelier';
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main class="flex-1 flex flex-col relative w-full pt-[7.5rem] pb-safe bg-surface">
+<main class="flex-1 flex flex-col relative w-full pt-[11.5rem] pb-safe bg-surface">
   <div class="max-w-velora w-full mx-auto px-4 sm:px-8 flex flex-col gap-6">
 
     <div class="flex items-baseline justify-between border-b border-surface-container-high pb-4">
@@ -73,7 +79,7 @@ require_once __DIR__ . '/includes/header.php';
           <?php foreach ($cartItems as $item): ?>
             <div id="cart-row-<?= $item['id'] ?>" class="bg-surface-container-lowest p-4 rounded-xl border border-surface-container-high/60 shadow-sm flex gap-4 items-center">
               <a href="product.php?id=<?= $item['product_id'] ?>" class="w-20 sm:w-24 aspect-[3/4] rounded bg-surface-container overflow-hidden shrink-0">
-                <img class="w-full h-full object-cover" src="<?= htmlspecialchars($item['primary_image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>"/>
+                <img class="w-full h-full object-cover" src="<?= htmlspecialchars(veloraImageUrl($item['primary_image'])) ?>" alt="<?= htmlspecialchars($item['title']) ?>"/>
               </a>
 
               <div class="flex-1 min-w-0 flex flex-col justify-between py-1">
@@ -146,6 +152,48 @@ require_once __DIR__ . '/includes/header.php';
                 ✓ Voucher <?= htmlspecialchars($appliedCoupon) ?> applied successfully!
               </p>
             <?php endif; ?>
+
+            <div class="space-y-2 pt-2">
+              <span class="font-label-caps text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Available Vouchers</span>
+              <?php if (empty($availableCoupons)): ?>
+                <p class="font-sans text-[11px] text-outline">There are no active vouchers at the moment.</p>
+              <?php else: ?>
+                <div class="max-h-56 space-y-2 overflow-y-auto pr-1">
+                  <?php foreach ($availableCoupons as $coupon): ?>
+                    <div class="rounded-lg border border-outline-variant/50 bg-surface p-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="font-mono text-xs font-bold tracking-wider text-primary"><?= htmlspecialchars($coupon['code']) ?></span>
+                        <span class="font-sans text-xs font-semibold text-secondary">
+                          <?php if ($coupon['discount_type'] === 'percentage'): ?>
+                            <?= rtrim(rtrim(number_format((float)$coupon['discount_value'], 2), '0'), '.') ?>% off
+                          <?php else: ?>
+                            <?= formatINR($coupon['discount_value']) ?> off
+                          <?php endif; ?>
+                        </span>
+                      </div>
+                      <p class="font-sans text-[11px] text-on-surface-variant mt-1"><?= htmlspecialchars($coupon['description']) ?></p>
+                      <div class="flex items-center justify-between gap-2 mt-2">
+                        <span class="font-sans text-[10px] text-outline">
+                          Min. spend <?= formatINR($coupon['min_spend']) ?>
+                          <?php if ($subtotal < $coupon['min_spend']): ?>
+                            · Add <?= formatINR($coupon['min_spend'] - $subtotal) ?> more
+                          <?php endif; ?>
+                        </span>
+                        <button
+                          type="button"
+                          data-coupon-code="<?= htmlspecialchars($coupon['code'], ENT_QUOTES, 'UTF-8') ?>"
+                          onclick="applyAvailableCoupon(this)"
+                          <?= $appliedCoupon === $coupon['code'] ? 'disabled' : '' ?>
+                          class="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary hover:underline disabled:text-secondary disabled:no-underline"
+                        >
+                          <?= $appliedCoupon === $coupon['code'] ? 'Applied' : 'Apply' ?>
+                        </button>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
           </div>
 
           <!-- Cost Calculations -->
@@ -245,6 +293,11 @@ require_once __DIR__ . '/includes/header.php';
     } else {
       triggerAddedToast(d.error || 'Failed to apply voucher', false);
     }
+  }
+
+  function applyAvailableCoupon(button) {
+    document.getElementById('cart-coupon-input').value = button.dataset.couponCode;
+    applyCartCoupon();
   }
 </script>
 

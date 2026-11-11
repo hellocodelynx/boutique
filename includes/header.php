@@ -91,16 +91,16 @@ $pageTitle = $pageTitle ?? 'VELORA — Wear Your Story | Luxury Fashion Boutique
           <span class="material-symbols-outlined text-[24px]">menu</span>
         </a>
         <a href="index.php" class="flex items-center gap-2 group">
-          <img alt="VELORA Luxury Logo" class="h-8 w-auto object-contain transition-transform group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AEtjO1Wl4YLNj-dOM-dn-JkZONeHH1n-vsK73LmNbVVAU1Qne88mayxeeXXwPkPDVp_n5lfG--n43ALT2cU0-iI_9iJ1DnzQHVQwy6iHkKJTetq5MBedhKUOCuXZPus2XFTnT2BeycGBz2wJhLn3q31Xaz9vTRqj23s8n8U1dwRwxnsAFUWQSHKFNJHCBF4DPjfY8nJ55K8ueYPlYQmw6JVENWwm9ceQ9Q518QKbniWS1lp7Zt8NlJOYw-mz_XE"/>
+          <img alt="VELORA Luxury Logo" class="h-8 w-auto object-contain transition-transform group-hover:scale-105" src="<?= htmlspecialchars(veloraImageUrl('assets/img/velora-logo.svg')) ?>"/>
           <span class="font-serif text-2xl uppercase tracking-widest text-primary font-medium hidden min-[360px]:inline-block">VELORA</span>
         </a>
       </div>
 
       <!-- Action Icons -->
       <div class="flex items-center gap-1">
-        <a href="shop.php" aria-label="Search Collection" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+        <!-- <a href="shop.php" aria-label="Search Collection" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors">
           <span class="material-symbols-outlined text-[22px]">search</span>
-        </a>
+        </a> -->
         
         <!-- Wishlist -->
         <a href="wishlist.php" aria-label="Saved Wishlist" class="relative w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors" data-path="wishlist">
@@ -118,10 +118,10 @@ $pageTitle = $pageTitle ?? 'VELORA — Wear Your Story | Luxury Fashion Boutique
           </span>
         </a>
 
-        <!-- Account Profile -->
-        <a href="index.php" aria-label="Atelier Member Account" class="w-11 h-11 flex items-center justify-center pl-1" data-path="account">
-          <img alt="Atelier Member Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJk3k8ZhR53atfvbAeQcDTIUB-YAOk8VlEo1RQUlWenzw_Kf7H8TG3O7FSsvodtx9qeRrK7edw46Ggse6RHzzWzDGDeS_WilmJXZ22pGprhocrjxgQJzvutcQxGRH0zbRmugTZXJ7dXD2m1MuSAP0mFCtd_34W-Y9qxzS935wDmhPEw3XbWhGDhhjaPRF7vs8X98idhbzWohEqqDebMkBKsNFL4YWd_zaG-Ixl8MouCTSC7GbFhSvr"/>
-        </a>
+        <!-- Account Profile / Admin Portal -->
+        <!-- <a href="admin/login.php" aria-label="Atelier Executive Portal" class="w-11 h-11 flex items-center justify-center pl-1" title="Atelier Executive Portal" data-path="account">
+          <img alt="Atelier Member Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/20 hover:ring-primary transition-all" src="<?= htmlspecialchars(veloraImageUrl('assets/img/atelier-muse.jpg')) ?>"/>
+        </a> -->
       </div>
     </div>
 

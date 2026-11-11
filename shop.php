@@ -172,7 +172,7 @@ require_once __DIR__ . '/includes/header.php';
           <article class="velora-card flex flex-col bg-surface-container-lowest shadow-sm rounded-none overflow-hidden group border border-surface-container-high/60">
             <div class="relative w-full aspect-[3/4] bg-surface-container overflow-hidden">
               <a href="product.php?id=<?= $product['id'] ?>" class="block w-full h-full">
-                <img class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" src="<?= htmlspecialchars($product['primary_image']) ?>" alt="<?= htmlspecialchars($product['title']) ?>"/>
+                <img class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" src="<?= htmlspecialchars(veloraImageUrl($product['primary_image'])) ?>" alt="<?= htmlspecialchars($product['title']) ?>"/>
               </a>
               
               <?php if (!empty($product['badge'])): ?>

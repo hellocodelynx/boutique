@@ -32,16 +32,15 @@ $cartSubtotal = getCartSubtotal();
         <div class="flex flex-col gap-2">
           <span class="font-label-caps text-on-surface font-semibold tracking-wider">Flagship Salons</span>
           <p class="font-sans text-sm text-on-surface-variant leading-relaxed">
-            Kala Ghoda, Mumbai<br/>
-            Mehrauli, New Delhi<br/>
-            Lavelle Road, Bengaluru
+            R.S Puram<br/>
+            Coimbatore
           </p>
         </div>
         <div class="flex flex-col gap-2">
           <span class="font-label-caps text-on-surface font-semibold tracking-wider">Concierge</span>
           <p class="font-sans text-sm text-on-surface-variant leading-relaxed">
             Mon – Sun: 10:00 AM – 8:00 PM IST<br/>
-            concierge@velora.in<br/>
+            shop@velora.in<br/>
             +91 (0) 22 4580 9100
           </p>
         </div>
@@ -59,7 +58,7 @@ $cartSubtotal = getCartSubtotal();
       <!-- Legal & Stack Attribution -->
       <div class="pt-6 border-t border-surface-container-high/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
         <p class="font-label-caps text-[10px] tracking-widest text-outline uppercase">
-          VELORA ATELIER PRIVATE LIMITED • PHP/MYSQL ENGINE REST API V2.4 READY
+          VELORA ATELIER PRIVATE LIMITED • <a href="admin/login.php" class="hover:text-primary transition-colors underline underline-offset-2">Atelier Executive Portal</a>
         </p>
         <p class="font-sans text-xs text-outline">
           © <?= date('Y') ?> VELORA. Wear Your Story. Handcrafted in India.
@@ -94,9 +93,9 @@ $cartSubtotal = getCartSubtotal();
         </span>
         <span class="font-label-caps text-[9px] uppercase tracking-wider"><?= formatINR($cartSubtotal) ?></span>
       </a>
-      <a class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-14 text-on-surface-variant hover:text-primary transition-colors" data-path="account" href="index.php">
-        <span class="material-symbols-outlined text-[22px]">person</span>
-        <span class="font-label-caps text-[9px] uppercase tracking-wider">Account</span>
+      <a class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-14 text-on-surface-variant hover:text-primary transition-colors" data-path="account" href="admin/login.php">
+        <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+        <span class="font-label-caps text-[9px] uppercase tracking-wider">Atelier</span>
       </a>
     </div>
   </nav>

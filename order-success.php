@@ -63,7 +63,7 @@ require_once __DIR__ . '/includes/header.php';
               <div class="flex items-center justify-between py-2.5">
                 <div class="flex items-center gap-3">
                   <?php if (!empty($oi['primary_image'])): ?>
-                    <img class="w-10 h-12 rounded object-cover" src="<?= htmlspecialchars($oi['primary_image']) ?>" alt="Piece"/>
+                    <img class="w-10 h-12 rounded object-cover" src="<?= htmlspecialchars(veloraImageUrl($oi['primary_image'])) ?>" alt="Piece"/>
                   <?php endif; ?>
                   <div>
                     <p class="font-serif text-xs text-on-surface"><?= htmlspecialchars($oi['product_title']) ?></p>

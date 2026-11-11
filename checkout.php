@@ -153,7 +153,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="divide-y divide-surface-container-high max-h-60 overflow-y-auto space-y-2 pr-1">
           <?php foreach ($cartItems as $it): ?>
             <div class="flex items-center gap-3 py-2">
-              <img class="w-12 h-14 rounded object-cover bg-surface-container shrink-0" src="<?= htmlspecialchars($it['primary_image']) ?>" alt="<?= htmlspecialchars($it['title']) ?>"/>
+              <img class="w-12 h-14 rounded object-cover bg-surface-container shrink-0" src="<?= htmlspecialchars(veloraImageUrl($it['primary_image'])) ?>" alt="<?= htmlspecialchars($it['title']) ?>"/>
               <div class="flex-1 min-w-0">
                 <p class="font-serif text-xs text-on-surface truncate"><?= htmlspecialchars($it['title']) ?></p>
                 <p class="font-sans text-[10px] text-on-surface-variant">Qty: <?= $it['quantity'] ?> • Size: <?= htmlspecialchars($it['size_code'] ?? 'S') ?></p>
