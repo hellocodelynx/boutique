@@ -183,14 +183,6 @@ $pendingOrdersCount = (int)($stmtPending ? $stmtPending->fetch()['c'] : 0);
             <?php endif; ?>
           </a>
 
-          <!-- Customer Profiles -->
-          <!-- <a href="orders.php" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all <?= $currentTab === 'customers' ? 'bg-[#661e30] text-[#fff8f2] font-semibold shadow-sm' : 'text-[#d4c2c7] hover:bg-[#2b0f19] hover:text-[#fff8f2] font-medium' ?>">
-            <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-[20px] <?= $currentTab === 'customers' ? 'text-white' : 'text-[#d4c2c7]' ?>">badge</span>
-              <span class="text-sm tracking-wide">Customer Profiles</span>
-            </div>
-          </a> -->
-
           <!-- Promo Codes -->
           <a href="coupons.php" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all <?= $currentTab === 'coupons' ? 'bg-[#661e30] text-[#fff8f2] font-semibold shadow-sm' : 'text-[#d4c2c7] hover:bg-[#2b0f19] hover:text-[#fff8f2] font-medium' ?>">
             <div class="flex items-center gap-3">
@@ -259,11 +251,6 @@ $pendingOrdersCount = (int)($stmtPending ? $stmtPending->fetch()['c'] : 0);
           <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
           <span class="text-[10px] uppercase font-bold text-primary tracking-wider">Atelier Live</span>
         </div>
-        
-        <form action="orders.php" method="GET" class="flex-1 flex items-center bg-surface-container-low rounded-xl px-3.5 py-2 text-on-surface-variant gap-2 border border-surface-container-high/60 focus-within:border-primary transition-colors">
-          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">search</span>
-          <input name="q" class="bg-transparent border-0 outline-none w-full text-xs text-on-surface placeholder:text-on-surface-variant" placeholder="Search orders, SKU units, patrons..." type="text"/>
-        </form>
       </div>
 
       <!-- Action Controls & Admin Profile -->

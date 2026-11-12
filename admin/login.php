@@ -2,24 +2,28 @@
 define('VELORA_ACCESS', true);
 require_once __DIR__ . '/includes/admin_auth.php';
 
-if (isAdminLoggedIn()) {
-    header('Location: index.php');
-    exit;
-}
-
 $error = null;
-$identifier = 'admin@velora.com';
+$identifier = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $identifier = trim($_POST['identifier'] ?? '');
-    $password = $_POST['password'] ?? '';
+    logoutAdmin();
+    $identifier = is_string($_POST['identifier'] ?? null) ? trim($_POST['identifier']) : '';
+    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
     
     if (loginAdmin($identifier, $password)) {
         header('Location: index.php');
         exit;
     } else {
-        $error = "The username or password entered does not match our authorized records. Please verify your credentials or use Forgot Password to reset.";
+        $_SESSION['admin_login_error'] = "The username or password entered does not match our authorized records. Please verify your credentials or use Forgot Password to reset.";
+        $_SESSION['admin_login_identifier'] = $identifier;
+        header('Location: login.php', true, 303);
+        exit;
     }
+} else {
+    logoutAdmin();
+    $error = $_SESSION['admin_login_error'] ?? null;
+    $identifier = $_SESSION['admin_login_identifier'] ?? '';
+    unset($_SESSION['admin_login_error'], $_SESSION['admin_login_identifier']);
 }
 ?>
 <!DOCTYPE html>
@@ -100,19 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <nav class="hidden md:flex items-center gap-6">
         <a class="text-xs uppercase tracking-widest font-semibold py-1.5 px-3 bg-primary-container text-on-primary rounded" href="login.php">Secure Access</a>
-        <a class="text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors py-1.5 px-3" href="recovery.php">Credential Recovery</a>
         <a class="text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors py-1.5 px-3" href="../index.php">← Public Boutique</a>
       </nav>
-
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-surface-container-high">
-          <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-          <span class="text-[10px] uppercase font-semibold text-on-surface-variant tracking-wider">TLS 1.3 / EAL6+ Active</span>
-        </div>
-        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
-          <span class="material-symbols-outlined text-on-primary text-[18px]">lock</span>
-        </div>
-      </div>
     </div>
   </header>
 
@@ -206,10 +199,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2 class="font-serif text-2xl text-on-surface">Staff &amp; Executive Sign In</h2>
               </div>
             </div>
-            <div class="hidden sm:flex flex-col items-end text-right">
-              <span class="text-[9px] uppercase tracking-widest text-outline">Terminal ID</span>
-              <span class="text-xs text-on-surface-variant font-mono font-medium">BOM-WS-8842</span>
-            </div>
           </div>
 
           <p class="text-xs text-on-surface-variant mb-6 leading-relaxed">
@@ -227,37 +216,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <p class="text-xs text-on-surface-variant mt-0.5"><?= htmlspecialchars($error) ?></p>
                 </div>
               </div>
-              <span class="text-[10px] uppercase text-error font-bold px-2 py-0.5 rounded bg-error/10 shrink-0 whitespace-nowrap">2 attempts remaining</span>
-            </div>
-            <div class="flex items-center gap-1.5 pt-1 text-[11px] text-error font-medium">
-              <span class="material-symbols-outlined text-[15px]">lock_clock</span>
-              <span>Security protocol: 2 attempts remaining before security lockout</span>
             </div>
           </div>
           <?php endif; ?>
-
-          <!-- Credentials Quick Reference Pill for Testing -->
-          <div class="mb-6 p-3 bg-secondary-container/30 border border-secondary/30 rounded-lg flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-[18px] text-secondary">info</span>
-              <span class="text-on-secondary-container font-medium">Demo Access: <strong>admin</strong> or <strong>admin@velora.com</strong></span>
-            </div>
-            <span class="text-primary font-mono font-bold bg-surface px-2 py-0.5 rounded border border-outline-variant/60">admin123</span>
-          </div>
 
           <form action="login.php" method="POST" class="flex flex-col gap-5">
             
             <!-- Admin Username / Email -->
             <div class="flex flex-col gap-1.5">
               <label class="flex items-center justify-between text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold">
-                <span>Admin Username / Enterprise ID</span>
-                <span class="text-outline text-[10px] normal-case">admin or admin@velora.com</span>
+                <span>Admin Username</span>
               </label>
               <div class="relative flex items-center">
                 <div class="absolute left-3.5 text-secondary">
                   <span class="material-symbols-outlined text-[20px]">account_circle</span>
                 </div>
-                <input class="w-full bg-surface-container-low text-on-surface text-sm pl-11 pr-4 py-3.5 rounded-lg focus:outline-none border border-outline-variant/60 focus:border-primary focus:bg-surface transition-all shadow-sm" name="identifier" placeholder="admin or admin@velora.com" required="" type="text" value="<?= htmlspecialchars($identifier) ?>"/>
+                <input class="w-full bg-surface-container-low text-on-surface text-sm pl-11 pr-4 py-3.5 rounded-lg focus:outline-none border border-outline-variant/60 focus:border-primary focus:bg-surface transition-all shadow-sm" name="identifier" placeholder="Enter your username" required="" autocomplete="username" type="text" value="<?= htmlspecialchars($identifier) ?>"/>
               </div>
             </div>
 
@@ -265,13 +239,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="flex flex-col gap-1.5">
               <div class="flex items-center justify-between">
                 <label class="text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold">Password</label>
-                <a class="text-[10px] uppercase text-primary hover:underline transition-colors font-bold underline-offset-4" href="recovery.php">Forgot Password?</a>
               </div>
               <div class="relative flex items-center">
                 <div class="absolute left-3.5 text-secondary">
                   <span class="material-symbols-outlined text-[20px]">lock</span>
                 </div>
-                <input class="w-full bg-surface-container-low text-on-surface text-sm pl-11 pr-11 py-3.5 rounded-lg focus:outline-none border border-outline-variant/60 focus:border-primary focus:bg-surface font-mono tracking-wider transition-all shadow-sm" id="passphraseInput" name="password" placeholder="••••••••••••" required="" type="password" value="admin123"/>
+                <input class="w-full bg-surface-container-low text-on-surface text-sm pl-11 pr-11 py-3.5 rounded-lg focus:outline-none border border-outline-variant/60 focus:border-primary focus:bg-surface transition-all shadow-sm" id="passphraseInput" name="password" placeholder="Enter your password" required="" autocomplete="current-password" type="password"/>
                 <button class="absolute right-3.5 text-on-surface-variant hover:text-on-surface p-1 flex items-center justify-center transition-colors" id="togglePassphraseBtn" onclick="togglePassVisibility()" title="Toggle password visibility" type="button">
                   <span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility</span>
                 </button>
@@ -296,53 +269,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mt-2 p-3 bg-surface-container-low rounded-lg flex items-start gap-2.5 border border-surface-container-high/60">
               <span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 shrink-0">shield_lock</span>
               <p class="text-[11px] text-on-surface-variant leading-relaxed">
-                Authorized admin session monitored under VELORA's tamper-proof security ledger (<span class="font-mono text-primary font-semibold">#SEC-SYS-994</span>).
+                Authorized admin session monitored under VELORA's tamper-proof security ledger.
               </p>
             </div>
           </form>
-        </div>
-      </div>
-
-      <!-- Atelier Executive Quick Status Footer Banner -->
-      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3 border border-surface-container-high/60">
-          <div class="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
-            <span class="material-symbols-outlined text-[20px]">schedule</span>
-          </div>
-          <div>
-            <span class="text-[10px] uppercase text-outline block">Server Time (IST)</span>
-            <p class="text-xs font-semibold text-on-surface font-mono"><?= date('H:i:s') ?> IST</p>
-          </div>
-        </div>
-
-        <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3 border border-surface-container-high/60">
-          <div class="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
-            <span class="material-symbols-outlined text-[20px]">palette</span>
-          </div>
-          <div>
-            <span class="text-[10px] uppercase text-outline block">Active Lookbook Batch</span>
-            <p class="text-xs font-semibold text-on-surface">Autumn Couture ’25</p>
-          </div>
-        </div>
-
-        <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3 border border-surface-container-high/60">
-          <div class="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
-            <span class="material-symbols-outlined text-[20px]">security</span>
-          </div>
-          <div>
-            <span class="text-[10px] uppercase text-outline block">Compliance Status</span>
-            <p class="text-xs font-semibold text-emerald-700">ISO 27001 &amp; GDPR OK</p>
-          </div>
-        </div>
-
-        <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3 border border-surface-container-high/60">
-          <div class="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
-            <span class="material-symbols-outlined text-[20px]">support_agent</span>
-          </div>
-          <div>
-            <span class="text-[10px] uppercase text-outline block">Executive Helpdesk</span>
-            <p class="text-xs font-semibold text-primary">ext. 4099 (Priority)</p>
-          </div>
         </div>
       </div>
     </div>

@@ -84,10 +84,6 @@ $orders = $stmt->fetchAll();
 
     <!-- Top Action Buttons -->
     <div class="flex items-center flex-wrap gap-3">
-      <a href="index.php?export=csv" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-all text-xs uppercase tracking-wider font-semibold border border-surface-container-high/60">
-        <span class="material-symbols-outlined text-[18px] text-secondary">file_download</span>
-        <span>Export Manifest (CSV)</span>
-      </a>
       <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-all text-xs uppercase tracking-wider font-semibold border border-surface-container-high/60">
         <span class="material-symbols-outlined text-[18px] text-primary">print</span>
         <span>Print Labels</span>
@@ -97,93 +93,6 @@ $orders = $stmt->fetchAll();
         <span>+ Create Bespoke Order</span>
       </button>
     </div>
-  </div>
-
-  <!-- Atelier Metrics Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-    
-    <!-- Metric 1 -->
-    <div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
-      <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Total Active Pipeline</span>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="font-serif text-3xl text-on-surface font-semibold"><?= max($counts['all'], 148) ?></span>
-            <span class="text-xs text-on-surface-variant font-medium">Orders</span>
-          </div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
-          <span class="material-symbols-outlined text-[20px]">inventory_2</span>
-        </div>
-      </div>
-      <div class="mt-4 pt-3 flex items-center justify-between text-xs text-on-surface-variant border-t border-surface-container-high/40">
-        <span class="text-primary font-semibold">₹18.42L active</span>
-        <span class="text-secondary font-bold flex items-center gap-1">
-          <span class="material-symbols-outlined text-[15px]">trending_up</span> +12% this week
-        </span>
-      </div>
-    </div>
-
-    <!-- Metric 2 -->
-    <div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
-      <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">In Artisan Workshop</span>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="font-serif text-3xl text-primary font-semibold"><?= max($counts['processing'], 28) ?></span>
-            <span class="text-xs text-on-surface-variant font-medium">Garments</span>
-          </div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
-          <span class="material-symbols-outlined text-[20px]">brush</span>
-        </div>
-      </div>
-      <div class="mt-4 pt-3 flex items-center justify-between text-xs text-on-surface-variant border-t border-surface-container-high/40">
-        <span class="truncate">Hand-embroidery &amp; Pleating</span>
-        <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-[10px] font-bold text-on-surface">14 Weavers</span>
-      </div>
-    </div>
-
-    <!-- Metric 3 -->
-    <div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
-      <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Quality &amp; Alterations Check</span>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="font-serif text-3xl text-on-surface font-semibold">16</span>
-            <span class="text-xs text-on-surface-variant font-medium">Orders</span>
-          </div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-secondary-container/60 flex items-center justify-center text-on-secondary-container">
-          <span class="material-symbols-outlined text-[20px]">straighten</span>
-        </div>
-      </div>
-      <div class="mt-4 pt-3 flex items-center justify-between text-xs text-on-surface-variant border-t border-surface-container-high/40">
-        <span class="truncate">Doorstep fitting verifications</span>
-        <span class="text-primary font-bold">4 urgent audits</span>
-      </div>
-    </div>
-
-    <!-- Metric 4 -->
-    <div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col justify-between">
-      <div class="flex items-start justify-between">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Dispatched / VIP Valet</span>
-          <div class="flex items-baseline gap-2 mt-1">
-            <span class="font-serif text-3xl text-on-surface font-semibold"><?= max($counts['in_transit'] + $counts['delivered'], 42) ?></span>
-            <span class="text-xs text-on-surface-variant font-medium">Shipments</span>
-          </div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface">
-          <span class="material-symbols-outlined text-[20px]">local_shipping</span>
-        </div>
-      </div>
-      <div class="mt-4 pt-3 flex items-center justify-between text-xs text-on-surface-variant border-t border-surface-container-high/40">
-        <span>Bluedart Apex &amp; DHL</span>
-        <span class="font-semibold text-secondary">98.4% On-Schedule</span>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -199,18 +108,6 @@ $orders = $stmt->fetchAll();
       <a href="orders.php" class="text-outline hover:text-on-surface"><span class="material-symbols-outlined text-[16px]">close</span></a>
       <?php endif; ?>
     </form>
-
-    <!-- Channels & Date selectors -->
-    <div class="flex items-center gap-2">
-      <div class="px-3.5 py-2 bg-surface-container-low rounded-xl text-on-surface text-xs border border-surface-container-high/60 flex items-center gap-2">
-        <span class="material-symbols-outlined text-[16px] text-secondary">calendar_today</span>
-        <span>All Timeframes</span>
-      </div>
-      <div class="px-3.5 py-2 bg-surface-container-low rounded-xl text-on-surface text-xs border border-surface-container-high/60 flex items-center gap-2">
-        <span class="material-symbols-outlined text-[16px] text-primary">storefront</span>
-        <span>Online &amp; Salons</span>
-      </div>
-    </div>
   </div>
 
   <!-- Status Tabs -->

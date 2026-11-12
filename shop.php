@@ -229,13 +229,7 @@ require_once __DIR__ . '/includes/header.php';
               </div>
 
               <!-- Mini Size Availability Indicator -->
-              <div class="flex items-center gap-1.5 pt-2 border-t border-surface-container-high/40 text-[9px] font-label-caps text-on-surface-variant">
-                <span class="uppercase text-outline">Sizes:</span>
-                <span class="text-on-surface font-semibold">XS</span>
-                <span class="text-primary font-bold underline">S</span>
-                <span class="text-on-surface font-semibold">M</span>
-                <span class="text-on-surface font-semibold">L</span>
-              </div>
+
             </div>
           </article>
         <?php endforeach; ?>

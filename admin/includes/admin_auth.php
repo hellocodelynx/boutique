@@ -49,35 +49,27 @@ function requireAdminLogin() {
 
 function loginAdmin($identifier, $password) {
     startVeloraSession();
+    if (!is_string($identifier) || !is_string($password) || $identifier === '' || $password === '') {
+        return false;
+    }
+
     $pdo = getDbConnection();
     
     $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ? OR email = ? LIMIT 1");
     $stmt->execute([$identifier, $identifier]);
     $admin = $stmt->fetch();
     
-    if (!$admin) {
-        // Fallback check for default admin if not yet seeded
-        if (($identifier === 'admin' || $identifier === 'admin@velora.com') && ($password === 'admin123' || $password === 'admin')) {
-            $_SESSION['velora_admin_id'] = 1;
-            $_SESSION['velora_admin_user'] = 'admin';
-            $_SESSION['velora_admin_email'] = 'admin@velora.com';
-            $_SESSION['velora_admin_name'] = 'Eleanor Vance';
-            $_SESSION['velora_admin_role'] = 'Head Couturier';
-            return true;
-        }
+    if (!$admin || !password_verify($password, $admin['password_hash'])) {
         return false;
     }
-    
-    if (password_verify($password, $admin['password_hash']) || (($identifier === 'admin' || $identifier === 'admin@velora.com') && $password === 'admin123')) {
-        $_SESSION['velora_admin_id'] = $admin['id'];
-        $_SESSION['velora_admin_user'] = $admin['username'];
-        $_SESSION['velora_admin_email'] = $admin['email'];
-        $_SESSION['velora_admin_name'] = $admin['full_name'];
-        $_SESSION['velora_admin_role'] = $admin['role'];
-        return true;
-    }
-    
-    return false;
+
+    session_regenerate_id(true);
+    $_SESSION['velora_admin_id'] = $admin['id'];
+    $_SESSION['velora_admin_user'] = $admin['username'];
+    $_SESSION['velora_admin_email'] = $admin['email'];
+    $_SESSION['velora_admin_name'] = $admin['full_name'];
+    $_SESSION['velora_admin_role'] = $admin['role'];
+    return true;
 }
 
 function logoutAdmin() {
@@ -88,4 +80,3 @@ function logoutAdmin() {
     unset($_SESSION['velora_admin_name']);
     unset($_SESSION['velora_admin_role']);
 }
-
